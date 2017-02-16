@@ -1,0 +1,4 @@
+ <response>
+    <id>unauthorized</id>
+    <message>Missing loggedIn query parameter.</message>
+</response>

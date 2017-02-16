@@ -1,4 +1,4 @@
 {
-  id: "badRequest",
-  message: "Missing query parameter."
+  "id": "badRequest",
+  "message": "Missing query parameter."
 }

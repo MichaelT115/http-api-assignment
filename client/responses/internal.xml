@@ -1,0 +1,4 @@
+<response>
+    <id>internalError</id>
+    <message>Internal Service Error. Something has gone very wrong.</message>
+</response>

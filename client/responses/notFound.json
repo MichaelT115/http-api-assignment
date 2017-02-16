@@ -1,4 +1,4 @@
 {
-  id: "notFound",
-  message: "The resource requested cannot be found."
+  "id": "notFound",
+  "message": "The resource requested cannot be found."
 }

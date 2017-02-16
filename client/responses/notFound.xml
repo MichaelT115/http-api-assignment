@@ -1,0 +1,4 @@
+ <response>
+    <id>notFound</id>
+    <message>The resource requested cannot be found.</message>
+</response>

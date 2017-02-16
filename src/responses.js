@@ -9,8 +9,10 @@ const extToType = {
   '.css': 'text/css',
   '.json': 'application/json',
   '.js': 'application/javascript',
+  '.xml': 'text/xml',
 };
 
+// Preload 404 page.
 const page404 = fs.readFileSync(`${__dirname}/../client/responses/notFound.json`);
 
 const getFile = (request, response, fileName) => {
@@ -18,56 +20,96 @@ const getFile = (request, response, fileName) => {
   const fileExt = path.extname(filePath);
 
   fs.readFile(filePath, (err, data) => {
+    // Handle error
     if (err) {
-      response.writeHead(404, { 'Content-Type': extToType['.json'] });
+      // Gets 404 page for missing resource.
+      response.writeHead(404, { 'Content-Type': 'application/json' });
       response.write(page404);
       response.end();
-
       return;
     }
 
+    // Sends back the data.
     response.writeHead(200, { 'Content-Type': extToType[fileExt] });
     response.write(data);
     response.end();
   });
 };
 
-const handleStatusCalls = (request, response, fileName) => {
-  const pathName = urlObject.pathname;
-  const query = urlObject.query;
+// Handles the requests to get the error status codes.
+const handleStatusResponses = (request, response, urlObject) => {
+  const pathName = urlObject.pathname;  // Gets the path name in the URL
+  const query = urlObject.query;  // Gets the query
+  const fileExt = request.headers.accept === 'text/xml' ? '.xml' : '.json'; // Find the file extension based off the Accept header
 
-  console.log(path.basename(pathName, fileExt));
+  // Handles each case of a status page
+  // Finds the corresponding file and writes it onto the response.
+  let responseFile;
   switch (pathName) {
-    case '/badRequest.json':
-      if (!query.valid) {
-        response.writeHead(400, { 'Content-Type': extToType[fileExt] });
-        const responseFile = fs.readFileSync(`${__dirname}/../client/responses/badRequest${fileExt}`);
-        response.write(responseFile);
-        response.end();
+    // A successful page
+    case '/success':
+      getFile(request, response, `responses/success${fileExt}`);  // We can load this one normally
+      break;
+
+    // Handle bad request page.
+    case '/badRequest':
+      // If the "valid" field is  there and true.
+      if (query.valid && query.valid === 'true') {
+        getFile(request, response, `responses/badRequestValid${fileExt}`);
       } else {
-        response.writeHead(200, { 'Content-Type': extToType[fileExt] });
-        const responseFile = fs.readFileSync(`${__dirname}/../client/responses/badRequestValid${fileExt}`);
+        response.writeHead(400, { 'Content-Type': request.headers.accept });
+        responseFile = fs.readFileSync(`${__dirname}/../client/responses/badRequest${fileExt}`);
         response.write(responseFile);
         response.end();
       }
       break;
-    case '/unauthorized.json':
-      if (!query.loggedIn || query.loggedIn !== 'yes') {
-        console.log('Test Invalid');
-        response.writeHead(400, { 'Content-Type': extToType[fileExt] });
-        const responseFile = fs.readFileSync(`${__dirname}/../client/responses/unathorized${fileExt}`);
-        response.write(responseFile);
-        response.end();
+
+    // Handle unauthorized page.
+    case '/unauthorized':
+    // if there is a "loggedIn" field and it is equal to "yes"
+      if (query.loggedIn && query.loggedIn === 'yes') {
+        getFile(request, response, `responses/unauthorizedValid${fileExt}`);
       } else {
-        console.log('Test Valid');
-        response.writeHead(200, { 'Content-Type': extToType[fileExt] });
-        const responseFile = fs.readFileSync(`${__dirname}/../client/responses/unathorizedValid${fileExt}`);
+        response.writeHead(401, { 'Content-Type': request.headers.accept });
+        responseFile = fs.readFileSync(`${__dirname}/../client/responses/unauthorized${fileExt}`);
         response.write(responseFile);
         response.end();
       }
+      break;
+
+      // Handle forbidden page
+    case '/forbidden':
+      response.writeHead(403, { 'Content-Type': request.headers.accept });
+      responseFile = fs.readFileSync(`${__dirname}/../client/responses/forbidden${fileExt}`);
+      response.write(responseFile);
+      response.end();
+      break;
+
+      // Handle internal page
+    case '/internal':
+      response.writeHead(500, { 'Content-Type': request.headers.accept });
+      responseFile = fs.readFileSync(`${__dirname}/../client/responses/internal${fileExt}`);
+      response.write(responseFile);
+      response.end();
+      break;
+
+      // Handle notImplemented page
+    case '/notImplemented':
+      response.writeHead(501, { 'Content-Type': request.headers.accept });
+      responseFile = fs.readFileSync(`${__dirname}/../client/responses/notImplemented${fileExt}`);
+      response.write(responseFile);
+      response.end();
+      break;
+
+      // Handle remaining pages - All should be NOT FOUND (404)
+    default:
+      response.writeHead(404, { 'Content-Type': request.headers.accept });
+      responseFile = fs.readFileSync(`${__dirname}/../client/responses/notFound${fileExt}`);
+      response.write(responseFile);
+      response.end();
       break;
   }
 };
 
 module.exports.getFile = getFile;
-module.exports.handleStatusCalls = handleStatusCalls;
+module.exports.handleStatusResponses = handleStatusResponses;

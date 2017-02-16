@@ -10,26 +10,27 @@ const port = process.env.PORT || process.env.NODE_PORT || 3000;
 const onRequest = (request, response) => {
   console.log(request.url);
 
-  const urlObject = url.parse(request.url, true);
+  const urlObject = url.parse(request.url, true); // This object represents the URL.
 
-  console.log(urlObject);
-  console.log(urlObject.query);
-  console.log(request.headers);
-  
-
+  // This gets the title of the URL minus the query field.
   switch (urlObject.pathname) {
+    // Default page
     case '/':
       responses.getFile(request, response, '/client.html');
       break;
+
+    // The status pages. These induce status codes.
     case '/success':
-    case '/badrRequest':
-    case 'unauthroized':
+    case '/badRequest':
+    case '/unauthorized':
     case '/forbidden':
     case '/internal':
-    case '/notImpemented':
+    case '/notImplemented':
     case '/notFound':
-      responses.handleStatusCalls(request, response, urlObject.pathname);
+      responses.handleStatusResponses(request, response, urlObject);
       break;
+
+    // Retrieves all other files. Also handles Resource Not Found conditions.
     default:
       responses.getFile(request, response, urlObject.pathname);
       break;

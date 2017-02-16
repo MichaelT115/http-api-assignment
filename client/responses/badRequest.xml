@@ -1,0 +1,4 @@
+<response>
+    <id>badRequest</id>
+    <message>Missing query parameter.</message>
+</response>
