@@ -1,0 +1,4 @@
+{
+  id: "badRequest",
+  message: "Missing query parameter."
+}

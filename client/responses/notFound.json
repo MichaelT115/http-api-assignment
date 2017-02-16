@@ -1,0 +1,4 @@
+{
+  id: "notFound",
+  message: "The resource requested cannot be found."
+}

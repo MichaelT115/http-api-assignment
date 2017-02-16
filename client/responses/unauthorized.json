@@ -1,0 +1,4 @@
+{
+  id: "unauthorized",
+  message: "Missing loggedIn query parameter."
+}
